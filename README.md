@@ -2,7 +2,7 @@
 
 A local **laptop/PC prototype** for ASUS UGen AI League 2026 Stage I and a Computer Networks course assignment. It does **not** run on UGen300. The interchangeable vision interface provides a future UGen300/HailoRT deployment path; that adapter is not implemented.
 
-## Quick start: camera-free rehearsal
+## Quick start: simulation
 
 Python 3.11+; no extra packages are needed for simulation, dashboard, SQLite, or tests.
 
@@ -10,15 +10,15 @@ Python 3.11+; no extra packages are needed for simulation, dashboard, SQLite, or
 python main.py --demo --hydration-seconds 8
 ```
 
-Open **http://127.0.0.1:8765**. Stop with Ctrl+C. The dashboard prominently marks this mode **SIMULATION**. It is a scripted integration rehearsal, not proof of webcam detection.
+Open **http://127.0.0.1:8765**. Stop with Ctrl+C. The dashboard prominently marks this mode **SIMULATION**. Simulation supplies scripted detections to the same tracking, memory, and rule pipeline used by the camera.
 
 Simulation is **manual by default**. Use the **Simulation director** buttons to move/hide/return the bottle, hide/return the phone, and show/hide a cat. The scene holds until you change it. Inventory and events still use normal confirmation and disappearance delays.
 
-Click **Start 8-second hydration timer** when you reach that scene in the narration. It enables the real hydration rule with an eight-second demonstration interval; sustained bottle movement resets the countdown. It does not create an interaction or warning event directly. Reminders are disabled in manual simulation until you start the timer. Live camera keeps its separately configured hydration interval.
+Click **Start 8-second hydration timer** to enable the demonstration reminder. It enables the real hydration rule with an eight-second demonstration interval; sustained bottle movement resets the countdown. It does not create an interaction or warning event directly. Reminders are disabled in manual simulation until you start the timer. Live camera keeps its separately configured hydration interval.
 
-**Reset scene** restores the bottle to the left, returns the phone, hides the cat, and disables the demo timer. It **keeps recorded history**. Use a new `--db` filename for a fresh take. Simulation and camera use separate databases by default.
+**Reset scene** restores the bottle to the left, returns the phone, hides the cat, and disables the demo timer. It **keeps recorded history**. Use a new `--db` filename for a fresh session. Simulation and camera use separate databases by default.
 
-The legacy automatic 40-second scenario remains available for automated rehearsals:
+The legacy automatic 40-second scenario remains available for automated demonstrations:
 
 ```sh
 python main.py --demo --auto-demo --hydration-seconds 8
@@ -32,8 +32,8 @@ If the embedded browser cannot request camera permission, open the same local da
 
 ```sh
 source .venv/bin/activate
-python main.py --demo --hydration-seconds 25
-# Then click Start live camera in the dashboard.
+python main.py --browser-camera
+# Click Start live camera in the dashboard.
 ```
 
 Alternatively, `python main.py --browser-camera` starts the dashboard waiting for browser frames. Direct OpenCV capture via `--camera 0` remains available. The dashboard stays open after detector/camera errors so you can retry or return to simulation.
@@ -48,10 +48,10 @@ Use **Python 3.11 or 3.12** for broad PyTorch/OpenCV wheel compatibility. On Win
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python main.py --camera 0 --device cpu --hydration-seconds 30
+python main.py --camera 0 --device cpu
 ```
 
-`yolo11n.pt` is the default lightweight COCO-pretrained model. Its weights may download on the first run; download and warm up before recording. After dependencies and weights are available, inference and assistance run locally. Use `--model /path/to/yolo11n.pt` for already downloaded weights. CPU speed depends on the laptop; reduce `--image-size 320` for a faster trial, with possible accuracy loss.
+`yolo11n.pt` is the default lightweight COCO-pretrained model. Its weights may download on the first run; the first startup requires network access if the weights are not already available. After dependencies and weights are available, inference and assistance run locally. Use `--model /path/to/yolo11n.pt` for already downloaded weights. CPU speed depends on the laptop; reduce `--image-size 320` for a faster trial, with possible accuracy loss.
 
 Camera troubleshooting: close other camera apps, grant OS camera permission, and try `--camera 1`. Camera startup/read/inference failures are logged and pause observation; they do not turn unavailable frames into disappearance events. Restart after fixing the camera. The dashboard indicates stale observations. No video frames are saved to disk.
 
@@ -92,10 +92,10 @@ python main.py --camera 0 --confidence 0.4 --image-size 640 \
 | `--db` | `data/deskmind.db` / `data/demo.db` | Camera / simulation SQLite database |
 | `--port` | `8765` | Local browser server port |
 | `--no-ui` | off | Run detection and event memory without a server |
-| `--duration` | unlimited | Stop after N seconds for rehearsal/testing |
+| `--duration` | unlimited | Stop after N seconds |
 | `--log-level` | `INFO` | Logging verbosity |
 
-Database defaults are relative to `main.py`, independent of your terminal directory. An explicitly provided relative `--db` path is relative to your terminal directory. For a fresh rehearsal, provide a **new** database filename. Existing events remain persisted across runs. On startup, previously present objects require confirmation again and an `observation_gap` event records that offline presence is unknown. No disappearance is invented for offline time. Hydration timing restarts on reconfirmation. Queries show UTC timestamps; the dashboard uses the browser's local time.
+Database defaults are relative to `main.py`, independent of your terminal directory. An explicitly provided relative `--db` path is relative to your terminal directory. For a fresh session, provide a **new** database filename. Existing events remain persisted across runs. On startup, previously present objects require confirmation again and an `observation_gap` event records that offline presence is unknown. No disappearance is invented for offline time. Hydration timing restarts on reconfirmation. Queries show UTC timestamps; the dashboard uses the browser's local time.
 
 The server binds only to `127.0.0.1`. This is a single-user local tool, not an internet-facing service. Read-only endpoints: `/api/state`, `/api/frame`, `/api/query?q=Where%20is%20my%20bottle%3F`.
 
@@ -117,16 +117,16 @@ Future HailoBackend ─┘                     └→ Rules → warnings + event
 python -m unittest discover -s tests -v
 ```
 
-Tests use injected detections and a mocked model/camera, plus a real local HTTP server and SQLite. With OpenCV installed, a browser-camera integration test sends actual encoded JPEGs through the queue/decoder, verifies memory isolation, pause/resume, source switching, and request-origin protection. Both the automatic scenario and manual controls are tested through the normal memory/rule path. These tests verify behavior, not real detector accuracy, real camera availability, or Hailo execution. See [validation](docs/validation.md) for the checks actually run on this environment.
+Tests use injected detections and a mocked model/camera, plus a real local HTTP server and SQLite. With OpenCV installed, a browser-camera integration test sends actual encoded JPEGs through the queue/decoder, verifies memory isolation, pause/resume, source switching, and request-origin protection. Both the automatic scenario and manual controls are tested through the normal memory/rule path. These tests verify behavior, not real detector accuracy, real camera availability, or Hailo execution. See [validation](docs/validation.md) for test coverage and verification limits.
 
-## Before the October 14 submission
+## Documentation
 
-1. Run real webcam mode on the demo laptop. Fix camera angle/lighting; use one recognizable bottle and phone. Measure actual FPS and detection reliability rather than claiming a benchmark.
-2. Rehearse using a 20–30 second hydration timeout and a fresh camera database. Keep production default at 30 minutes.
-3. Record approximately three minutes of **actual webcam** demonstration. Clearly identify any simulated fallback. See [demo script](docs/demo-script.md).
-4. Finish the English proposal deck with main content no more than 20 pages, export the proposal PDF, and upload the video.
-5. Publish the repository to your own GitHub account; put the actual GitHub and video URLs on the **final slide**. The English [proposal outline](docs/proposal-outline.md) includes the required final-slide placeholders.
+- [Architecture and hardware deployment path](docs/architecture.md)
+- [Demo walkthrough](docs/demo-script.md)
+- [Validation and limitations](docs/validation.md)
 
-The submission requirements and deadline above are the project brief provided by the user; check the organizer/course submission portal for final upload details.
+## Local data
+
+SQLite databases store object observations and event history locally. Database files, SQLite journal files, downloaded model weights, and the virtual environment are excluded from Git. The tracked `data/.gitkeep` only preserves the empty data directory; it contains no observations.
 
 Backend API reference: [Ultralytics prediction documentation](https://docs.ultralytics.com/modes/predict/).

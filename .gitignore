@@ -4,6 +4,13 @@ __pycache__/
 *.egg-info/
 data/*
 !data/.gitkeep
+# Local SQLite state and journals, including custom database paths.
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
 *.pt
 *.onnx
 *.hef

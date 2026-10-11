@@ -56,7 +56,7 @@ def parse_args(argv=None):
     p.add_argument('--db', type=Path, help='Default: data/demo.db in simulation, data/deskmind.db for webcam')
     p.add_argument('--port', type=int, default=8765)
     p.add_argument('--no-ui', action='store_true')
-    p.add_argument('--duration', type=positive, help='Exit after this many seconds, for rehearsal/smoke testing')
+    p.add_argument('--duration', type=positive, help='Exit after the specified number of seconds')
     p.add_argument('--log-level', choices=['DEBUG','INFO','WARNING','ERROR'], default='INFO')
     args = p.parse_args(argv)
     if args.auto_demo and not args.demo:
