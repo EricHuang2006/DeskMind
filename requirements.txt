@@ -1,0 +1,4 @@
+# Only needed for actual webcam inference; simulation and tests use standard Python.
+# Use Python 3.11 or 3.12 for broad Torch/OpenCV wheel compatibility.
+ultralytics==8.4.175
+opencv-python==4.14.0.94

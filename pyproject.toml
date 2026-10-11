@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deskmind"
+version = "0.1.0"
+description = "Local laptop workspace observation and temporal object memory"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+vision = ["ultralytics==8.4.175", "opencv-python==4.14.0.94"]
+
+[tool.setuptools]
+packages = ["deskmind"]
+
+[tool.setuptools.package-data]
+deskmind = ["dashboard.html"]
